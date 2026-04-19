@@ -2,7 +2,7 @@ import tempfile
 from pathlib import Path
 from urllib.parse import urlparse
 
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, redirect, request
 
 from foodrag import config
 from foodrag.factcheck import run_fact_check, run_fact_check_llm_only
@@ -22,6 +22,11 @@ def add_cors_headers(response):
 @app.route("/api/claims", methods=["GET"])
 def list_claims():
     return jsonify({"claims": get_available_claims()})
+
+
+@app.route("/", methods=["GET"])
+def index():
+    return redirect("/index.html", code=307)
 
 
 @app.route("/api/evaluate", methods=["POST", "OPTIONS"])
