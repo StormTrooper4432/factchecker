@@ -7,13 +7,6 @@ from flask import Flask, jsonify, request
 from foodrag import config
 from foodrag.factcheck import run_fact_check, run_fact_check_llm_only
 from foodrag.hardcoded_prompts import get_available_claims
-from foodrag.retrieval import (
-    extract_terms,
-    merge_top_chunks,
-    retrieve_top_chunks,
-    retrieve_top_chunks_chroma,
-)
-from pmc_pull_api import search_and_download
 
 app = Flask(__name__)
 
@@ -38,12 +31,12 @@ def evaluate_claim():
 
     payload = request.get_json(silent=True) or {}
     claim = str(payload.get("claim", "")).strip()
-    mode = str(payload.get("mode", "")).strip().lower()
+    mode = str(payload.get("mode", "llm_only")).strip().lower()
     if not claim:
         return jsonify({"error": "Missing claim text."}), 400
 
     # Fast path: LLM-only mode (no retrieval)
-    if mode == "llm_only":
+    if mode != "hybrid":
         verdict, reasoning, sources = run_fact_check_llm_only(claim)
         evidence = []
         for idx, src in enumerate(sources, 1):
@@ -79,6 +72,14 @@ def evaluate_claim():
                 "mode": "llm_only",
             }
         )
+
+    from foodrag.retrieval import (
+        extract_terms,
+        merge_top_chunks,
+        retrieve_top_chunks,
+        retrieve_top_chunks_chroma,
+    )
+    from pmc_pull_api import search_and_download
 
     terms = extract_terms(claim)
     query_terms = []

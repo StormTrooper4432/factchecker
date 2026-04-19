@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE = import.meta.env.VITE_API_BASE || '/api';
 const API_ONLY_STEPS = [
   'Sending claim to the API',
   'Generating verdict, reasoning, and sources',
@@ -90,7 +90,7 @@ export default function App() {
           setResult(data);
         }
       } catch (error) {
-        setStatus('Unable to connect to the backend. Is backend.py running?');
+        setStatus('Unable to connect to the API.');
       } finally {
         setIsLoading(false);
         setProgressText('');
