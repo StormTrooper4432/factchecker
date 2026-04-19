@@ -1,0 +1,11 @@
+__pycache__/
+.venv/
+.venv-1/
+.idea/
+chroma_db/
+data/
+.DS_Store
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+*.pyc
