@@ -20,7 +20,7 @@ def _render_source(source: dict, index: int) -> None:
 
 
 st.title("Nutrition Fact Checker")
-st.write("Check a nutrition or fitness claim using the API-only fact-check flow.")
+st.write("Check a nutrition or fitness claim using the fact-checking pipeline.")
 
 example_claims = get_available_claims()
 selected_example = st.selectbox(
