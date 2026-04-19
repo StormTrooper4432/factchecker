@@ -2,13 +2,14 @@ import tempfile
 from pathlib import Path
 from urllib.parse import urlparse
 
-from flask import Flask, jsonify, redirect, request
+from flask import Flask, jsonify, request, send_from_directory
 
 from foodrag import config
 from foodrag.factcheck import run_fact_check, run_fact_check_llm_only
 from foodrag.hardcoded_prompts import get_available_claims
 
 app = Flask(__name__)
+PUBLIC_DIR = Path(__file__).parent / "public"
 
 
 @app.after_request
@@ -26,7 +27,28 @@ def list_claims():
 
 @app.route("/", methods=["GET"])
 def index():
-    return redirect("/index.html", code=307)
+    return serve_frontend("index.html")
+
+
+@app.route("/<path:path>", methods=["GET"])
+def serve_frontend(path: str):
+    file_path = (PUBLIC_DIR / path).resolve()
+    try:
+        file_path.relative_to(PUBLIC_DIR.resolve())
+    except ValueError:
+        return jsonify({"error": "Invalid path."}), 404
+
+    if file_path.is_file():
+        return send_from_directory(PUBLIC_DIR, path)
+
+    if path == "index.html":
+        return jsonify({"error": "Frontend build output is missing."}), 404
+
+    index_file = PUBLIC_DIR / "index.html"
+    if index_file.is_file():
+        return send_from_directory(PUBLIC_DIR, "index.html")
+
+    return jsonify({"error": "Frontend build output is missing."}), 404
 
 
 @app.route("/api/evaluate", methods=["POST", "OPTIONS"])
