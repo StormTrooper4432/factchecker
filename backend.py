@@ -73,13 +73,22 @@ def evaluate_claim():
             }
         )
 
-    from foodrag.retrieval import (
-        extract_terms,
-        merge_top_chunks,
-        retrieve_top_chunks,
-        retrieve_top_chunks_chroma,
-    )
-    from pmc_pull_api import search_and_download
+    try:
+        from foodrag.retrieval import (
+            extract_terms,
+            merge_top_chunks,
+            retrieve_top_chunks,
+            retrieve_top_chunks_chroma,
+        )
+        from pmc_pull_api import search_and_download
+    except Exception as exc:
+        return jsonify(
+            {
+                "error": "Hybrid retrieval mode is unavailable in this deployment.",
+                "details": f"{type(exc).__name__}: {exc}",
+                "mode": "hybrid",
+            }
+        ), 501
 
     terms = extract_terms(claim)
     query_terms = []
